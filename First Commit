@@ -1,0 +1,142 @@
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <string>
+
+using namespace std;
+
+float computeTotal(float prices[], int qty[], int count, float &discount, float &vat) {
+    float subtotal = 0.0;
+    for (int i = 0; i < count; ++i)
+    {
+        subtotal += prices[i] * qty[i];
+    }
+    if (subtotal >= 2000)
+    {
+        discount = subtotal * 0.2f;
+    }
+    else if (subtotal >= 1000)
+    {
+        discount = subtotal * 0.1f;
+    }
+    else if (subtotal >= 500)
+    {
+        discount = subtotal * 0.05f;
+    }
+    else
+    {
+        discount = 0.0f;
+    }
+    vat = (subtotal - discount) * 0.12f;
+    return (subtotal - discount) + vat;
+}
+
+void displayReceipt(string items[], float prices[], int qty[], int count, float subtotal, float discount, float vat, float total)
+{
+    cout<<endl<<"+----------------------------+"<<endl;
+    cout<<"|     GROCERY RECEIPT        |"<<endl;
+    cout<<"+----------------------------+"<<endl;
+    cout<<left<<setw(15)<<"Item"<<setw(6)<<"Qty"<<setw(8)<<"Price"<<setw(10)<<"Total"<<endl;
+    cout<<"------------------------------" <<endl;
+    for (int i = 0; i < count; ++i) {
+        cout <<left<<setw(15)<<items[i]
+             <<setw(6)<<qty[i]
+             <<setw(8)<<fixed<<setprecision(2)<<prices[i]
+             <<setw(10) << prices[i] * qty[i]<<endl;
+    }
+    cout<<"------------------------------" << endl;
+    cout<<left<<setw(20)<<"Subtotal:"<<" "<<setw(10)<<subtotal<<endl;
+    cout<<left<<setw(20)<<"Discount:"<<" "<<setw(10)<<discount<<endl;
+    cout<<left<<setw(20)<<"VAT (12%):"<<" "<<setw(10)<<vat<<endl;
+    cout<<left<<setw(20)<<"TOTAL TO PAY:"<<" "<<setw(10)<<total<<endl;
+    cout<<"+----------------------------+"<<endl;
+}
+
+int main()
+{
+    const int MAX_ITEMS = 10;
+    string items[MAX_ITEMS];
+    float prices[MAX_ITEMS];
+    int qty[MAX_ITEMS];
+    int itemCount = 0;
+
+    int customerCount = 0;
+    char continueShopping;
+    do
+    {
+        cout<<endl<<"Processing Customer #"<<++customerCount<<endl;
+
+        cout<<"How many different items? (1-50): ";
+        cin>>itemCount;
+        while (itemCount < 1 || itemCount > 50)
+        {
+            cout<<"Invalid entry. Enter a number between 1 and 10: ";
+            cin>>itemCount;
+        }
+
+        for (int i = 0; i < itemCount; ++i)
+        {
+            cout<<endl<<"Item " << (i + 1) << " name: ";
+            cin.ignore();
+            getline(cin, items[i]);
+
+            cout<<"Quantity: ";
+            cin>>qty[i];
+
+
+            while (qty[i] <= 0 || cin.fail())
+            {
+                if (cin.fail())
+                {
+                    cin.clear();
+                    cin.ignore(1000, '\n');
+                    cout << "Invalid input (not a number). ";
+                }
+                else
+                {
+                    cout << "Invalid quantity (must be positive). ";
+                }
+
+                cout << "Enter again: ";
+                cin >> qty[i];
+            }
+
+            cout<<"Price per item: ";
+            cin>>prices[i];
+
+            switch (qty[i])
+            {
+                case 10:
+                    cout<<"Special offer: Extra 2% off for buying 10 units!"<<endl;
+                    prices[i] *= 0.98f;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        float discount = 0, vat = 0, total = 0, subtotal = 0;
+
+        for (int i = 0; i < itemCount; ++i)
+        {
+            subtotal += prices[i] * qty[i];
+        }
+        total = computeTotal(prices, qty, itemCount, discount, vat);
+
+        displayReceipt(items, prices, qty, itemCount, subtotal, discount, vat, total);
+
+        cout<<endl<<"Process another customer? (Y/N): ";
+        cin>>continueShopping;
+        while (continueShopping != 'Y' && continueShopping != 'y' &&
+               continueShopping != 'N' && continueShopping != 'n')
+        {
+            cout<<"Please enter Y or N: ";
+            cin>>continueShopping;
+        }
+    }
+    while (continueShopping == 'Y' || continueShopping == 'y');
+
+    cout<<"All receipts done."<<endl<<endl;
+
+    return EXIT_SUCCESS;
+}
